@@ -71,7 +71,7 @@ class CO2B_Blocker
     }
 
     /* וריאציה → מוצר-אב; מקבל WC_Product או מזהה (?add-to-cart= עשוי להעביר מזהה וריאציה) */
-    private static function resolve_parent_id($product_or_id): int
+    public static function resolve_parent_id($product_or_id): int
     {
         if ($product_or_id instanceof WC_Product) {
             return $product_or_id->is_type('variation')
@@ -83,6 +83,20 @@ class CO2B_Blocker
             $id = (int) wp_get_post_parent_id($id);
         }
         return $id;
+    }
+
+    /* קטגוריות המוצר + כל האבות שלהן (מזהי term ייחודיים) — משמש גם את הזכאות הסיטונאית */
+    public static function effective_term_ids(int $pid): array
+    {
+        $terms = wc_get_product_term_ids($pid, 'product_cat');
+        if (!$terms) {
+            return [];
+        }
+        $effective = $terms;
+        foreach ($terms as $tid) {
+            $effective = array_merge($effective, get_ancestors($tid, 'product_cat', 'taxonomy'));
+        }
+        return array_unique(array_map('intval', $effective));
     }
 
     private static function compute_blocked(int $pid): bool
@@ -99,14 +113,8 @@ class CO2B_Blocker
         }
 
         /* 3. קטגוריות — כולל קטגוריות-אב (חסימת אב חוסמת גם תתי-קטגוריות) */
-        $terms = wc_get_product_term_ids($pid, 'product_cat');
-        if ($terms) {
-            $effective = $terms;
-            foreach ($terms as $tid) {
-                $effective = array_merge($effective, get_ancestors($tid, 'product_cat', 'taxonomy'));
-            }
-            $effective = array_unique(array_map('intval', $effective));
-
+        $effective = self::effective_term_ids($pid);
+        if ($effective) {
             $category_ids = array_map('intval', (array) CO2B_Settings::get('category_ids'));
             if (array_intersect($effective, $category_ids)) {
                 return true;

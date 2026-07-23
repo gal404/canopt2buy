@@ -1,0 +1,80 @@
+<?php
+defined('ABSPATH') || exit;
+
+/**
+ * רשימת הזמנות סיטונאיות — נטען מ-CO2B_Wholesale_Admin::render_page()
+ *
+ * @var stdClass $query תוצאת wc_get_orders(paginate=true): ->orders, ->total, ->max_num_pages
+ * @var int      $paged
+ */
+
+$orders = $query->orders;
+$pages  = (int) $query->max_num_pages;
+?>
+<div class="wrap co2b-ws-admin" dir="rtl">
+
+    <div class="co2b-wsa-header">
+        <div class="co2b-wsa-header-titles">
+            <h1>הזמנות סיטונאיות</h1>
+            <p>בקשות הזמנה שהתקבלו מהחנות — ללא חיוב, לטיפול ידני.</p>
+        </div>
+        <span class="co2b-wsa-total"><?php echo (int) $query->total; ?> הזמנות</span>
+    </div>
+
+    <?php if (empty($orders)) : ?>
+        <div class="co2b-wsa-empty">אין עדיין הזמנות סיטונאיות.</div>
+    <?php else : ?>
+        <table class="wp-list-table widefat striped co2b-wsa-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>תאריך</th>
+                    <th>לקוח</th>
+                    <th>טלפון</th>
+                    <th>סה"כ (כולל מע"מ)</th>
+                    <th>סטטוס</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($orders as $o) :
+                    $unread   = $o->get_meta(CO2B_Wholesale::META_UNREAD) === 'yes';
+                    $view_url = admin_url('admin.php?page=' . CO2B_Wholesale_Admin::MENU_SLUG . '&action=view&id=' . $o->get_id());
+                    ?>
+                    <tr class="<?php echo $unread ? 'co2b-wsa-unread' : ''; ?>">
+                        <td data-colname="#"><a href="<?php echo esc_url($view_url); ?>"><strong>#<?php echo esc_html($o->get_order_number()); ?></strong></a></td>
+                        <td data-colname="תאריך"><?php echo esc_html($o->get_date_created() ? $o->get_date_created()->date_i18n('d/m/Y H:i') : ''); ?></td>
+                        <td data-colname="לקוח"><?php echo esc_html($o->get_formatted_billing_full_name()); ?></td>
+                        <td data-colname="טלפון" dir="ltr"><?php echo esc_html($o->get_billing_phone()); ?></td>
+                        <td data-colname="סה&quot;כ"><?php echo wp_kses_post(wc_price($o->get_total())); ?></td>
+                        <td data-colname="סטטוס">
+                            <?php if ($unread) : ?>
+                                <span class="co2b-wsa-badge-new">חדש</span>
+                            <?php else : ?>
+                                <span class="co2b-wsa-badge-seen">נצפה</span>
+                            <?php endif; ?>
+                        </td>
+                        <td data-colname=""><a class="button button-small" href="<?php echo esc_url($view_url); ?>">צפייה</a></td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+
+        <?php if ($pages > 1) : ?>
+            <div class="co2b-wsa-pagination tablenav">
+                <div class="tablenav-pages">
+                    <?php
+                    echo paginate_links([
+                        'base'    => add_query_arg('paged', '%#%'),
+                        'format'  => '',
+                        'current' => $paged,
+                        'total'   => $pages,
+                        'prev_text' => '‹',
+                        'next_text' => '›',
+                    ]);
+                    ?>
+                </div>
+            </div>
+        <?php endif; ?>
+    <?php endif; ?>
+</div>

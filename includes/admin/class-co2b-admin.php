@@ -85,11 +85,36 @@ class CO2B_Admin
         }
         $token = sanitize_text_field(wp_unslash($_POST['co2b_github_token'] ?? ''));
 
+        /* ===== שדות סיטונאות ===== */
+        $ws_product_ids = array_values(array_unique(array_filter(
+            array_map('intval', (array) ($_POST['co2b_ws_product_ids'] ?? []))
+        )));
+        $ws_category_ids = array_values(array_unique(array_filter(
+            array_map('intval', (array) ($_POST['co2b_ws_category_ids'] ?? []))
+        )));
+        $confirm = trim(wp_kses_post(wp_unslash($_POST['co2b_ws_confirm'] ?? '')));
+        if ($confirm === '') {
+            $confirm = CO2B_Settings::DEFAULT_CONFIRM;
+        }
+
         CO2B_Settings::update([
             'product_ids'  => $product_ids,
             'category_ids' => $category_ids,
             'notice_text'  => $notice,
             'github_token' => $token,
+
+            'wholesale_enabled'         => !empty($_POST['co2b_ws_enabled']),
+            'wholesale_product_ids'     => $ws_product_ids,
+            'wholesale_category_ids'    => $ws_category_ids,
+            'wholesale_vat'             => max(0, (float) ($_POST['co2b_ws_vat'] ?? 18)),
+            'wholesale_min'             => max(0, (float) ($_POST['co2b_ws_min'] ?? 1000)),
+            'wholesale_free_ship'       => max(0, (float) ($_POST['co2b_ws_free_ship'] ?? 4500)),
+            'wholesale_ship_net'        => max(0, (float) ($_POST['co2b_ws_ship_net'] ?? 195)),
+            'wholesale_ship_product_id' => (int) ($_POST['co2b_ws_ship_product_id'] ?? 0),
+            'wholesale_shipping_terms'  => sanitize_textarea_field(wp_unslash($_POST['co2b_ws_shipping_terms'] ?? '')),
+            'wholesale_unloading_terms' => sanitize_textarea_field(wp_unslash($_POST['co2b_ws_unloading_terms'] ?? '')),
+            'wholesale_alert_email'     => sanitize_email(wp_unslash($_POST['co2b_ws_alert_email'] ?? '')),
+            'wholesale_confirm_text'    => $confirm,
         ]);
     }
 
