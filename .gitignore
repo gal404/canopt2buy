@@ -1,0 +1,9 @@
+# חבילות והפצה
+*.zip
+
+# מערכת הפעלה / עורך
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
