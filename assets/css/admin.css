@@ -103,6 +103,24 @@
 .co2b-f-block { display: block; margin-top: 12px; }
 .co2b-f-block textarea, .co2b-f-block input { margin-top: 6px; border-color: #dbe3ec; border-radius: 10px; }
 
+/* ----- Pull-blocked card ----- */
+.co2b-pull-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    background: linear-gradient(135deg, #fff 0%, #f1f5f9 100%);
+}
+.co2b-pull-text { flex: 1 1 300px; }
+.co2b-pull-text h2 { margin-bottom: 4px; }
+.co2b-pull-btn {
+    flex: 0 0 auto;
+    height: auto !important;
+    padding: 9px 18px !important;
+    font-weight: 700 !important;
+    border-radius: 10px !important;
+}
+
 /* ----- Chips ----- */
 .co2b-chips {
     display: flex;

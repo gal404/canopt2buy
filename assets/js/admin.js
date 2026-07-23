@@ -19,4 +19,32 @@ jQuery(function ($) {
         $('.co2b-panel').removeClass('is-active');
         $('.co2b-panel[data-panel="' + tab + '"]').addClass('is-active');
     });
+
+    /* משיכת המוצרים והקטגוריות החסומים אל הבחירה הסיטונאית */
+    function co2bCopyOptions(srcSel, dstSel) {
+        var $src = $(srcSel), $dst = $(dstSel), added = 0;
+        if (!$src.length || !$dst.length) { return 0; }
+        $src.find('option').each(function () {
+            var val = this.value, text = this.text;
+            if (!val) { return; }
+            var $existing = $dst.find('option[value="' + val + '"]');
+            if ($existing.length) {
+                $existing.prop('selected', true);
+            } else {
+                $dst.append(new Option(text, val, true, true));
+                added++;
+            }
+        });
+        $dst.trigger('change'); // רענון selectWoo
+        return added;
+    }
+
+    $('#co2b-pull-blocked').on('click', function () {
+        var $btn = $(this);
+        co2bCopyOptions('#co2b_block_products', '#co2b_ws_products');
+        co2bCopyOptions('#co2b_block_categories', '#co2b_ws_categories');
+        var label = $btn.text();
+        $btn.text('✓ נמשכו — לחצו "שמור הגדרות"').prop('disabled', true);
+        setTimeout(function () { $btn.text(label).prop('disabled', false); }, 2600);
+    });
 });

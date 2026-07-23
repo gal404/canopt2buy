@@ -48,7 +48,7 @@ $cart_url    = $settings['wholesale_cart_page_id'] ? get_permalink($settings['wh
             <div class="co2b-card">
                 <h2>🚫 מוצרים חסומים</h2>
                 <p class="co2b-card-desc">מוצרים שנבחרו כאן יוצגו באתר כרגיל — אך ללא אפשרות הוספה לעגלה או רכישה.</p>
-                <select name="co2b_product_ids[]" class="wc-product-search co2b-select" multiple
+                <select id="co2b_block_products" name="co2b_product_ids[]" class="wc-product-search co2b-select" multiple
                         data-action="woocommerce_json_search_products"
                         data-placeholder="חפש מוצר לפי שם או מק&quot;ט…">
                     <?php foreach ((array) $settings['product_ids'] as $pid) :
@@ -66,7 +66,7 @@ $cart_url    = $settings['wholesale_cart_page_id'] ? get_permalink($settings['wh
             <div class="co2b-card">
                 <h2>📂 קטגוריות חסומות</h2>
                 <p class="co2b-card-desc">כל המוצרים בקטגוריות שנבחרו — כולל תתי-הקטגוריות שלהן — ייחסמו לרכישה.</p>
-                <select name="co2b_category_ids[]" class="wc-category-search co2b-select" multiple
+                <select id="co2b_block_categories" name="co2b_category_ids[]" class="wc-category-search co2b-select" multiple
                         data-placeholder="חפש קטגוריה…">
                     <?php foreach ((array) $settings['category_ids'] as $cid) :
                         $co2b_term = get_term($cid, 'product_cat');
@@ -123,10 +123,18 @@ $cart_url    = $settings['wholesale_cart_page_id'] ? get_permalink($settings['wh
                 <p class="co2b-card-desc">מאפשר ללקוחות לאסוף מוצרים זכאים לתוך הזמנה סיטונאית שאינה מחייבת (רשימת בקשה).</p>
             </div>
 
+            <div class="co2b-card co2b-pull-card">
+                <div class="co2b-pull-text">
+                    <h2>↧ משיכת החסומים לסיטונאות</h2>
+                    <p class="co2b-card-desc">העתקת כל המוצרים והקטגוריות החסומים (מהטאב "חסימת רכישה") אל הבחירה הסיטונאית שלמטה. שימו לב: מוצרים חסומים ממילא זמינים לסיטונאות — זו דרך נוחה לראות ולערוך אותם כאן. לאחר המשיכה יש ללחוץ "שמור הגדרות".</p>
+                </div>
+                <button type="button" class="button button-secondary co2b-pull-btn" id="co2b-pull-blocked">משוך את כל החסומים ←</button>
+            </div>
+
             <div class="co2b-card">
                 <h2>🧴 מוצרים סיטונאיים נוספים</h2>
-                <p class="co2b-card-desc">כל המוצרים החסומים זכאים אוטומטית. כאן ניתן להוסיף מוצרים סיטונאיים <strong>נוספים</strong> שאינם חסומים.</p>
-                <select name="co2b_ws_product_ids[]" class="wc-product-search co2b-select" multiple
+                <p class="co2b-card-desc">כל המוצרים החסומים זכאים אוטומטית. כאן ניתן להוסיף מוצרים סיטונאיים <strong>נוספים</strong> שאינם חסומים, או למשוך את החסומים בכפתור שמעל.</p>
+                <select id="co2b_ws_products" name="co2b_ws_product_ids[]" class="wc-product-search co2b-select" multiple
                         data-action="woocommerce_json_search_products"
                         data-placeholder="חפש מוצר…">
                     <?php foreach ((array) $settings['wholesale_product_ids'] as $pid) :
@@ -141,7 +149,7 @@ $cart_url    = $settings['wholesale_cart_page_id'] ? get_permalink($settings['wh
 
             <div class="co2b-card">
                 <h2>📂 קטגוריות סיטונאיות נוספות</h2>
-                <select name="co2b_ws_category_ids[]" class="wc-category-search co2b-select" multiple
+                <select id="co2b_ws_categories" name="co2b_ws_category_ids[]" class="wc-category-search co2b-select" multiple
                         data-placeholder="חפש קטגוריה…">
                     <?php foreach ((array) $settings['wholesale_category_ids'] as $cid) :
                         $wt = get_term($cid, 'product_cat');
