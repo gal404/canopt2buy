@@ -45,6 +45,35 @@ class CO2B_Wholesale
         self::$eligible_cache = [];
     }
 
+    /* יצירת עמודי הקטלוג והעגלה אם חסרים — נקרא באקטיבציה וגם בעדכון גרסה
+       (מרפא התקנות שעודכנו בלי הפעלה מחדש). חייב לרוץ אחרי init של סוגי הפוסטים. */
+    public static function ensure_pages(): void
+    {
+        $map = [
+            'wholesale_catalog_page_id' => ['title' => 'קטלוג סיטונאי', 'shortcode' => '[co2b_wholesale_catalog]'],
+            'wholesale_cart_page_id'    => ['title' => 'הזמנה סיטונאית', 'shortcode' => '[co2b_wholesale_cart]'],
+        ];
+        $changes = [];
+        foreach ($map as $key => $data) {
+            $existing = (int) CO2B_Settings::get($key);
+            if ($existing && get_post_status($existing) === 'publish') {
+                continue;
+            }
+            $page_id = wp_insert_post([
+                'post_title'   => $data['title'],
+                'post_content' => $data['shortcode'],
+                'post_status'  => 'publish',
+                'post_type'    => 'page',
+            ]);
+            if ($page_id && !is_wp_error($page_id)) {
+                $changes[$key] = (int) $page_id;
+            }
+        }
+        if ($changes) {
+            CO2B_Settings::update($changes);
+        }
+    }
+
     /* ===== רישום סטטוס ===== */
 
     public static function register_post_status($statuses)

@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Cancel Option 2 Buy
  * Description: חסימת רכישה אונליין למוצרים/קטגוריות נבחרים + מסלול הזמנה סיטונאית שאינו מחייב. המוצר מוצג רגיל אך לא ניתן להוספה לעגלה, למעט מנהלי חנות.
- * Version: 1.1.1
+ * Version: 1.1.2
  * Author: Gal Ben Baruch
  * Requires Plugins: woocommerce
  * Requires PHP: 7.4
@@ -12,7 +12,7 @@
 if (!defined('ABSPATH')) exit;
 
 /* ===== קבועים ===== */
-define('CO2B_VERSION', '1.1.1');
+define('CO2B_VERSION', '1.1.2');
 define('CO2B_PLUGIN_FILE', __FILE__);
 define('CO2B_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('CO2B_PLUGIN_URL', plugin_dir_url(__FILE__));
@@ -53,34 +53,19 @@ add_action('plugins_loaded', function () {
     if (is_admin()) {
         CO2B_Admin::init();
         CO2B_Wholesale_Admin::init();
+
+        /* ריפוי עצמי בעדכון גרסה — יוצר עמודים חסרים גם כשלא הייתה הפעלה מחדש */
+        add_action('admin_init', function () {
+            if (get_option('co2b_version') !== CO2B_VERSION) {
+                CO2B_Wholesale::ensure_pages();
+                update_option('co2b_version', CO2B_VERSION);
+            }
+        });
     }
 });
 
 /* ===== אקטיבציה — יצירת עמודי הסיטונאות ===== */
 register_activation_hook(__FILE__, function () {
-    require_once CO2B_PLUGIN_DIR . 'includes/class-co2b-settings.php';
-
-    $pages = [
-        'wholesale_catalog_page_id' => ['title' => 'קטלוג סיטונאי', 'shortcode' => '[co2b_wholesale_catalog]'],
-        'wholesale_cart_page_id'    => ['title' => 'הזמנה סיטונאית', 'shortcode' => '[co2b_wholesale_cart]'],
-    ];
-    $changes = [];
-    foreach ($pages as $key => $data) {
-        $existing = (int) CO2B_Settings::get($key);
-        if ($existing && get_post_status($existing) === 'publish') {
-            continue;
-        }
-        $page_id = wp_insert_post([
-            'post_title'   => $data['title'],
-            'post_content' => $data['shortcode'],
-            'post_status'  => 'publish',
-            'post_type'    => 'page',
-        ]);
-        if ($page_id && !is_wp_error($page_id)) {
-            $changes[$key] = (int) $page_id;
-        }
-    }
-    if ($changes) {
-        CO2B_Settings::update($changes);
-    }
+    CO2B_Wholesale::ensure_pages();
+    update_option('co2b_version', CO2B_VERSION);
 });

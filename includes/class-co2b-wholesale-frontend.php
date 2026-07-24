@@ -122,7 +122,10 @@ class CO2B_Wholesale_Frontend
                 . '</div></div>';
         }
         $out .= '</div>';
-        $out .= '<div class="co2b-ws-catalog-foot"><a class="co2b-ws-gocart" href="' . esc_url(self::cart_url()) . '">מעבר לסיכום ההזמנה</a></div>';
+        $cart_url = self::cart_url();
+        if ($cart_url !== '') {
+            $out .= '<div class="co2b-ws-catalog-foot"><a class="co2b-ws-gocart" href="' . esc_url($cart_url) . '">מעבר לסיכום ההזמנה</a></div>';
+        }
         return $out;
     }
 
@@ -244,11 +247,15 @@ class CO2B_Wholesale_Frontend
         if (is_admin()) {
             return;
         }
+        $cart_url = self::cart_url();
+        if ($cart_url === '') {
+            return; // בלי עמוד עגלה אין לאן להוביל
+        }
         $count = CO2B_Wholesale::count_items();
         printf(
             '<a class="co2b-ws-fab%s" href="%s" id="co2b-ws-fab" aria-label="הזמנה סיטונאית">%s<span class="co2b-ws-fab-badge" id="co2b-ws-fab-badge">%d</span></a>',
             $count > 0 ? ' is-visible' : '',
-            esc_url(self::cart_url()),
+            esc_url($cart_url),
             self::cart_icon(),
             (int) $count
         );
@@ -454,8 +461,13 @@ class CO2B_Wholesale_Frontend
     private static function cart_url(): string
     {
         $pid = (int) CO2B_Settings::get('wholesale_cart_page_id');
-        $url = $pid ? get_permalink($pid) : '';
-        return $url ?: home_url('/');
+        if ($pid && get_post_status($pid) === 'publish') {
+            $url = get_permalink($pid);
+            if ($url) {
+                return $url;
+            }
+        }
+        return ''; // אין עמוד עגלה — לא מקשרים לבית
     }
 
     private static function cart_icon(): string
