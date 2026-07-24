@@ -346,3 +346,81 @@
 @media (prefers-reduced-motion: reduce) {
     .co2b-ws-add, .co2b-ws-card, .co2b-ws-fab, .co2b-ws-submit, .co2b-ws-gocart { transition: none; }
 }
+
+/* ===== הקשחה מול התבנית — מונע "הפתעות" מסגנונות גלובליים (Flatsome וכו') ===== */
+
+/* כל רכיבי הסיטונאות — קופסה עקבית */
+[class^="co2b-ws-"], [class*=" co2b-ws-"] { box-sizing: border-box; }
+
+/* כפתורי פעולה (גרדיאנט) — נטרול uppercase/letter-spacing/מסגרת/צל של התבנית */
+.co2b-ws-add,
+.co2b-ws-add-loop,
+.co2b-ws-submit,
+.co2b-ws-gocart {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    border: 0 !important;
+    border-radius: var(--co2b-radius-sm) !important;
+    background: linear-gradient(135deg, var(--co2b-gold) 0%, #9a6f08 100%) !important;
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    text-decoration: none !important;
+    text-shadow: none !important;
+    line-height: 1.2 !important;
+    min-width: 0 !important;
+    cursor: pointer;
+}
+.co2b-ws-add:hover, .co2b-ws-add-loop:hover, .co2b-ws-submit:hover, .co2b-ws-gocart:hover { color: #fff !important; }
+.co2b-ws-add.is-added { background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%) !important; }
+.co2b-ws-submit[disabled] { opacity: .5 !important; box-shadow: none !important; }
+
+/* שדות הטופס — גובה/מסגרת/רקע/צבע אחידים */
+.co2b-ws-form input {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 46px !important;
+    height: 46px !important;
+    margin: 0 !important;
+    padding: 0 14px !important;
+    border: 1px solid #dbe3ec !important;
+    border-radius: var(--co2b-radius-sm) !important;
+    background: #fff !important;
+    color: var(--co2b-slate) !important;
+    -webkit-text-fill-color: var(--co2b-slate) !important;
+    font-size: 15px !important;
+    line-height: 44px !important;
+    box-shadow: none !important;
+    text-transform: none !important;
+}
+.co2b-ws-form input:focus {
+    border-color: var(--co2b-gold) !important;
+    box-shadow: 0 0 0 3px rgba(184, 134, 11, .15) !important;
+    outline: 0 !important;
+}
+.co2b-ws-form input.co2b-ws-invalid { border-color: #dc2626 !important; box-shadow: 0 0 0 3px rgba(220, 38, 38, .12) !important; }
+
+/* צ'קבוקסים — שלא ייחתכו/יתעוותו */
+.co2b-ws-check input[type="checkbox"] {
+    -webkit-appearance: auto !important;
+    appearance: auto !important;
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important;
+    min-height: 20px !important;
+    margin: 1px 0 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    accent-color: var(--co2b-gold);
+}
+
+/* קישורים ותמונות */
+.co2b-ws-card-title, .co2b-ws-row-title, .co2b-ws-fab { text-decoration: none !important; }
+.co2b-ws-card-title:hover, .co2b-ws-row-title:hover, .co2b-ws-fab:hover { text-decoration: none !important; }
+.co2b-ws-catalog img, .co2b-ws-row-media img { max-width: 100% !important; }
+
+/* אקורדיון נהלים */
+.co2b-ws-acc summary { -webkit-appearance: none !important; appearance: none !important; }
