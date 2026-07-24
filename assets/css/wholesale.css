@@ -35,45 +35,77 @@
     margin: 14px 0 20px;
 }
 
+/* בורר כמות — מוקשח מול סגנונות התבנית (Flatsome וכו') כדי לא להתעוות */
 .co2b-ws-qty {
-    display: inline-flex;
+    display: inline-flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
     align-items: stretch;
+    width: auto;
+    max-width: 100%;
     border: 1px solid var(--co2b-gold-soft);
     border-radius: var(--co2b-radius-sm);
     overflow: hidden;
     background: #fff;
+    vertical-align: middle;
 }
 
 .co2b-ws-step {
-    width: 46px;
-    min-height: 48px;
-    border: 0;
+    flex: 0 0 auto !important;
+    width: 44px !important;
+    height: 48px !important;
+    min-height: 0 !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
     background: var(--co2b-ivory);
-    color: var(--co2b-ink);
-    font-size: 22px;
-    line-height: 1;
+    color: var(--co2b-ink) !important;
+    font-size: 22px !important;
+    font-weight: 700;
+    line-height: 1 !important;
     cursor: pointer;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    box-shadow: none !important;
+    -webkit-appearance: none;
+    appearance: none;
     transition: background .15s ease;
 }
 .co2b-ws-step:hover { background: var(--co2b-ivory-2); }
 
 .co2b-ws-qty-input {
-    width: 60px;
-    min-height: 48px;
-    border: 0;
-    border-inline: 1px solid var(--co2b-gold-soft);
-    text-align: center;
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--co2b-slate);
-    background: #fff;
+    flex: 0 0 auto !important;
+    width: 54px !important;
+    height: 48px !important;
+    min-height: 0 !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-inline: 1px solid var(--co2b-gold-soft) !important;
+    border-radius: 0 !important;
+    text-align: center !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    line-height: 48px !important;
+    color: var(--co2b-slate) !important;
+    -webkit-text-fill-color: var(--co2b-slate) !important;
+    text-indent: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
     -moz-appearance: textfield;
+    -webkit-appearance: none;
+    appearance: none;
+    opacity: 1 !important;
 }
 .co2b-ws-qty-input::-webkit-outer-spin-button,
 .co2b-ws-qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
-.co2b-ws-qty-sm .co2b-ws-step { width: 38px; min-height: 40px; font-size: 18px; }
-.co2b-ws-qty-sm .co2b-ws-qty-input { width: 48px; min-height: 40px; font-size: 15px; }
+.co2b-ws-qty-sm .co2b-ws-step { width: 40px !important; height: 42px !important; font-size: 18px !important; }
+.co2b-ws-qty-sm .co2b-ws-qty-input { width: 48px !important; height: 42px !important; font-size: 15px !important; line-height: 42px !important; }
 
 .co2b-ws-add,
 .co2b-ws-add-loop,
@@ -301,11 +333,12 @@
     .co2b-ws-grid { grid-template-columns: 1fr; }
     .co2b-ws-catalog { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
     .co2b-ws-row {
-        grid-template-columns: 56px 1fr;
-        grid-template-areas: "media main" "qty line" "remove remove";
+        grid-template-columns: 48px 1fr auto;
+        gap: 6px 8px;
+        padding: 10px;
     }
-    .co2b-ws-row-media { width: 56px; height: 56px; }
-    .co2b-ws-remove { justify-self: start; }
+    .co2b-ws-row-media { width: 48px; height: 48px; }
+    .co2b-ws-row-line { font-size: .95em; }
     /* סרגל סיכום דביק */
     .co2b-ws-summary { position: sticky; inset-block-end: 0; z-index: 20; margin-inline: -12px; }
     .co2b-ws-sumbox { border-radius: var(--co2b-radius) var(--co2b-radius) 0 0; box-shadow: 0 -4px 18px rgba(15, 23, 42, .12); }
