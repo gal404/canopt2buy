@@ -189,36 +189,39 @@
     gap: 10px;
 }
 
+/* שורת עגלה — flexbox עמיד (במקום grid שהתמתח ב-RTL) */
 .co2b-ws-row {
-    display: grid;
-    grid-template-columns: 64px 1fr auto;
-    grid-template-areas: "media main remove" "media qty line";
-    gap: 8px 12px;
-    align-items: center;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
     padding: 12px;
     background: #fff;
     border: 1px solid var(--co2b-line);
     border-radius: var(--co2b-radius);
     box-shadow: 0 1px 6px rgba(15, 23, 42, .04);
 }
-.co2b-ws-row-media { grid-area: media; width: 64px; height: 64px; border-radius: var(--co2b-radius-sm); overflow: hidden; background: #f8fafc; }
-.co2b-ws-row-media img { width: 100%; height: 100%; object-fit: cover; }
-.co2b-ws-row-main { grid-area: main; min-width: 0; }
-.co2b-ws-row-title { display: block; font-weight: 700; color: var(--co2b-slate); text-decoration: none; line-height: 1.3; }
+.co2b-ws-row-media { flex: 0 0 auto; width: 60px; height: 60px; border-radius: var(--co2b-radius-sm); overflow: hidden; background: #f8fafc; }
+.co2b-ws-row-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.co2b-ws-row-main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.co2b-ws-row-title { font-weight: 700; color: var(--co2b-slate); text-decoration: none; line-height: 1.3; }
 .co2b-ws-row-title:hover { color: var(--co2b-gold); }
-.co2b-ws-row-unit { font-size: 12px; color: var(--co2b-muted); margin-top: 2px; }
-.co2b-ws-row .co2b-ws-qty { grid-area: qty; }
-.co2b-ws-row-line { grid-area: line; font-weight: 800; color: var(--co2b-slate); white-space: nowrap; }
+.co2b-ws-row-unit { font-size: 12px; color: var(--co2b-muted); }
+.co2b-ws-row-controls { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 6px; }
+.co2b-ws-row-line { flex: 0 0 auto; font-weight: 800; color: var(--co2b-slate); white-space: nowrap; font-size: 1.02em; }
 .co2b-ws-remove {
-    grid-area: remove;
-    justify-self: end;
-    width: 30px; height: 30px;
-    border: 0; border-radius: 50%;
-    background: #f1f5f9; color: #64748b;
-    font-size: 20px; line-height: 1; cursor: pointer;
+    flex: 0 0 auto !important;
+    width: 30px !important; height: 30px !important;
+    min-width: 0 !important; min-height: 0 !important;
+    padding: 0 !important; margin: 0 !important;
+    border: 0 !important; border-radius: 50% !important;
+    background: #f1f5f9 !important; color: #64748b !important;
+    font-size: 20px !important; line-height: 1 !important; cursor: pointer;
+    display: flex !important; align-items: center; justify-content: center;
+    box-shadow: none !important;
+    -webkit-appearance: none; appearance: none;
     transition: background .15s ease, color .15s ease;
 }
-.co2b-ws-remove:hover { background: #fee2e2; color: #b91c1c; }
+.co2b-ws-remove:hover { background: #fee2e2 !important; color: #b91c1c !important; }
 
 .co2b-ws-summary {}
 .co2b-ws-sumbox {
@@ -332,13 +335,8 @@
 @media (max-width: 600px) {
     .co2b-ws-grid { grid-template-columns: 1fr; }
     .co2b-ws-catalog { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
-    .co2b-ws-row {
-        grid-template-columns: 48px 1fr auto;
-        gap: 6px 8px;
-        padding: 10px;
-    }
-    .co2b-ws-row-media { width: 48px; height: 48px; }
-    .co2b-ws-row-line { font-size: .95em; }
+    .co2b-ws-row { gap: 10px; padding: 10px; }
+    .co2b-ws-row-media { width: 52px; height: 52px; }
     /* סרגל סיכום דביק */
     .co2b-ws-summary { position: sticky; inset-block-end: 0; z-index: 20; margin-inline: -12px; }
     .co2b-ws-sumbox { border-radius: var(--co2b-radius) var(--co2b-radius) 0 0; box-shadow: 0 -4px 18px rgba(15, 23, 42, .12); }

@@ -156,13 +156,15 @@ class CO2B_Wholesale_Frontend
                 . '<div class="co2b-ws-row-main">'
                 . '<a class="co2b-ws-row-title" href="' . esc_url($ln['permalink']) . '">' . esc_html($ln['name']) . '</a>'
                 . '<div class="co2b-ws-row-unit">' . wp_kses_post(wc_price($ln['unit'])) . ' ליחידה</div>'
-                . '</div>'
+                . '<div class="co2b-ws-row-controls">'
                 . '<div class="co2b-ws-qty co2b-ws-qty-sm" data-co2b-qty>'
                 . '<button type="button" class="co2b-ws-step" data-co2b-dec aria-label="הפחת">−</button>'
                 . '<input type="number" class="co2b-ws-qty-input co2b-ws-cart-qty" value="' . esc_attr($ln['qty']) . '" min="1" step="1" inputmode="numeric" aria-label="כמות">'
                 . '<button type="button" class="co2b-ws-step" data-co2b-inc aria-label="הוסף">+</button>'
                 . '</div>'
                 . '<div class="co2b-ws-row-line">' . wp_kses_post(wc_price($ln['line'])) . '</div>'
+                . '</div>'
+                . '</div>'
                 . '<button type="button" class="co2b-ws-remove" data-co2b-remove aria-label="הסר">×</button>'
                 . '</div>';
         }
