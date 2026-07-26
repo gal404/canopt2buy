@@ -30,6 +30,7 @@ if ($w_net <= 0 && $w_grand > 0) {
 $notices = [
     'status' => ['success', '✅ הסטטוס עודכן.'],
     'note'   => ['success', '✅ ההערה נוספה.'],
+    'acks'   => ['success', '✅ אישורי הנהלים עודכנו.'],
 ];
 ?>
 <div class="wrap co2b-ws-admin" dir="rtl">
@@ -68,6 +69,25 @@ $notices = [
                 <button type="submit" class="button button-primary">עדכן סטטוס</button>
             </form>
             <p class="co2b-wsa-hint">שינוי כאן מתעדכן גם בעורך ההזמנות של WooCommerce (ולהיפך).</p>
+        </div>
+
+        <div class="co2b-wsa-card">
+            <h2>📋 אישורי נהלים</h2>
+            <p class="co2b-wsa-hint">אישור ידני (מנהל) של נהלי ההובלה והפריקה — למשל להזמנות שנוצרו/הומרו ידנית.</p>
+            <form method="post" class="co2b-wsa-acksform">
+                <?php wp_nonce_field('co2b_ws_manage_' . $order_id); ?>
+                <input type="hidden" name="co2b_action" value="acks">
+                <input type="hidden" name="order_id" value="<?php echo (int) $order_id; ?>">
+                <label class="co2b-wsa-ack">
+                    <input type="checkbox" name="ack_shipping" value="yes" <?php checked($order->get_meta(CO2B_Wholesale::META_ACK_SHIP) === 'yes'); ?>>
+                    אישור נהלי הובלה
+                </label>
+                <label class="co2b-wsa-ack">
+                    <input type="checkbox" name="ack_unloading" value="yes" <?php checked($order->get_meta(CO2B_Wholesale::META_ACK_UNLOAD) === 'yes'); ?>>
+                    אישור נהלי פריקה
+                </label>
+                <button type="submit" class="button button-primary">שמור אישורים</button>
+            </form>
         </div>
 
         <div class="co2b-wsa-card">

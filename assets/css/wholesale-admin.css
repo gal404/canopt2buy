@@ -125,6 +125,11 @@
 .co2b-wsa-statusform select { min-width: 180px; border-radius: 8px; }
 .co2b-wsa-hint { margin: 10px 0 0; color: #64748b; font-size: 12px; }
 
+/* טופס אישורי נהלים */
+.co2b-wsa-acksform { display: flex; flex-direction: column; gap: 12px; align-items: flex-start; margin-top: 6px; }
+.co2b-wsa-ack { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: #0f172a; cursor: pointer; }
+.co2b-wsa-ack input { width: 18px; height: 18px; accent-color: #2563eb; }
+
 /* הערות */
 .co2b-wsa-notes { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
 .co2b-wsa-note { padding: 12px 14px; background: #f8fafc; border: 1px solid #e8edf3; border-radius: 10px; border-inline-start: 3px solid #94a3b8; }

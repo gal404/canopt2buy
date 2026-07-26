@@ -113,6 +113,12 @@ class CO2B_Wholesale_Admin
                 $order->add_order_note($note, false, true);
             }
             self::redirect(['action' => 'view', 'id' => $id, 'msg' => 'note']);
+        } elseif ($act === 'acks') {
+            $order->update_meta_data(CO2B_Wholesale::META_ACK_SHIP, !empty($_POST['ack_shipping']) ? 'yes' : 'no');
+            $order->update_meta_data(CO2B_Wholesale::META_ACK_UNLOAD, !empty($_POST['ack_unloading']) ? 'yes' : 'no');
+            $order->add_order_note('אישורי נהלי הובלה/פריקה עודכנו ידנית ע"י ' . wp_get_current_user()->display_name . '.');
+            $order->save();
+            self::redirect(['action' => 'view', 'id' => $id, 'msg' => 'acks']);
         } elseif ($act === 'delete') {
             $order->delete(false); // העברה לאשפה
             delete_transient(CO2B_Wholesale::TRANSIENT_UNREAD);
