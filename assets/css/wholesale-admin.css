@@ -96,6 +96,49 @@
 .co2b-wsa-kv-total th, .co2b-wsa-kv-total td { border-top: 2px solid #e8edf3; padding-top: 12px; font-size: 1.1em; }
 .co2b-wsa-kv-total td { color: #b8860b; }
 
+/* סטטוס — תגיות צבעוניות */
+.co2b-wsa-status {
+    display: inline-block;
+    padding: 3px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    white-space: nowrap;
+}
+.co2b-wsa-status-co2b-whsale    { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+.co2b-wsa-status-co2b-handling  { background: #dbeafe; color: #1e40af; border-color: #bfdbfe; }
+.co2b-wsa-status-co2b-warehouse { background: #ede9fe; color: #5b21b6; border-color: #ddd6fe; }
+.co2b-wsa-status-co2b-shipping  { background: #cffafe; color: #155e75; border-color: #a5f3fc; }
+.co2b-wsa-status-co2b-delivered { background: #dcfce7; color: #166534; border-color: #bbf7d0; }
+
+.co2b-wsa-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #f59e0b; vertical-align: middle; }
+
+.co2b-wsa-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.co2b-wsa-actions form { margin: 0; }
+.button-link-delete { color: #b91c1c !important; }
+
+/* טופס סטטוס */
+.co2b-wsa-statusform { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.co2b-wsa-statusform select { min-width: 180px; border-radius: 8px; }
+.co2b-wsa-hint { margin: 10px 0 0; color: #64748b; font-size: 12px; }
+
+/* הערות */
+.co2b-wsa-notes { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+.co2b-wsa-note { padding: 12px 14px; background: #f8fafc; border: 1px solid #e8edf3; border-radius: 10px; border-inline-start: 3px solid #94a3b8; }
+.co2b-wsa-note.is-customer { border-inline-start-color: #2563eb; background: #eff6ff; }
+.co2b-wsa-note-body { color: #0f172a; font-size: 13px; }
+.co2b-wsa-note-body p { margin: 0 0 6px; }
+.co2b-wsa-note-meta { margin-top: 6px; color: #94a3b8; font-size: 11px; }
+.co2b-wsa-noteform { display: flex; flex-direction: column; gap: 8px; }
+.co2b-wsa-noteform textarea { width: 100%; border: 1px solid #dbe3ec; border-radius: 10px; padding: 10px 12px; font-size: 14px; }
+.co2b-wsa-noteform button { align-self: flex-start; }
+
+.co2b-wsa-danger { border-color: #fecaca; }
+.co2b-wsa-danger h2 { color: #b91c1c; }
+
 @media (max-width: 782px) {
     .co2b-wsa-cards { grid-template-columns: 1fr; }
     .co2b-wsa-header { padding: 16px 18px; }

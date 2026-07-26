@@ -47,13 +47,17 @@ class CO2B_Wholesale_Admin
             wp_die('אין הרשאה');
         }
 
+        self::handle_actions();
+
         $action = isset($_GET['action']) ? sanitize_key($_GET['action']) : '';
         $id     = isset($_GET['id']) ? (int) $_GET['id'] : 0;
+        $msg    = isset($_GET['msg']) ? sanitize_key($_GET['msg']) : '';
 
         if ($action === 'view' && $id) {
             $order = wc_get_order($id);
             if ($order && $order->get_meta(CO2B_Wholesale::META_FLAG) === 'yes') {
                 CO2B_Wholesale::mark_read($order);
+                $notes = wc_get_order_notes(['order_id' => $id]);
                 require CO2B_PLUGIN_DIR . 'includes/admin/views/wholesale-detail.php';
                 return;
             }
@@ -64,15 +68,62 @@ class CO2B_Wholesale_Admin
         $paged = max(1, isset($_GET['paged']) ? (int) $_GET['paged'] : 1);
         $per   = 20;
         $query = wc_get_orders([
-            'status'   => CO2B_Wholesale::STATUS_FULL,
-            'limit'    => $per,
-            'page'     => $paged,
-            'paginate' => true,
-            'orderby'  => 'date',
-            'order'    => 'DESC',
+            'status'     => CO2B_Wholesale::status_keys_prefixed(),
+            'limit'      => $per,
+            'page'       => $paged,
+            'paginate'   => true,
+            'orderby'    => 'date',
+            'order'      => 'DESC',
+            'meta_query' => [['key' => CO2B_Wholesale::META_FLAG, 'value' => 'yes']],
         ]);
 
         require CO2B_PLUGIN_DIR . 'includes/admin/views/wholesale-list.php';
+    }
+
+    /* ===== פעולות: שינוי סטטוס / הוספת הערה / מחיקה ===== */
+
+    private static function handle_actions(): void
+    {
+        if (empty($_POST['co2b_action'])) {
+            return;
+        }
+        $act = sanitize_key(wp_unslash($_POST['co2b_action']));
+        $id  = isset($_POST['order_id']) ? (int) $_POST['order_id'] : 0;
+
+        check_admin_referer('co2b_ws_manage_' . $id);
+        if (!current_user_can('manage_woocommerce')) {
+            wp_die('אין הרשאה');
+        }
+
+        $order = $id ? wc_get_order($id) : null;
+        if (!$order || $order->get_meta(CO2B_Wholesale::META_FLAG) !== 'yes') {
+            self::redirect(['msg' => 'notfound']);
+        }
+
+        if ($act === 'status') {
+            $new = preg_replace('/^wc-/', '', sanitize_key(wp_unslash($_POST['new_status'] ?? '')));
+            if (array_key_exists($new, CO2B_Wholesale::statuses())) {
+                $order->update_status($new, 'שינוי סטטוס דרך מסך ההזמנות הסיטונאיות. ');
+            }
+            self::redirect(['action' => 'view', 'id' => $id, 'msg' => 'status']);
+        } elseif ($act === 'note') {
+            $note = sanitize_textarea_field(wp_unslash($_POST['note'] ?? ''));
+            if ($note !== '') {
+                $order->add_order_note($note, false, true);
+            }
+            self::redirect(['action' => 'view', 'id' => $id, 'msg' => 'note']);
+        } elseif ($act === 'delete') {
+            $order->delete(false); // העברה לאשפה
+            delete_transient(CO2B_Wholesale::TRANSIENT_UNREAD);
+            self::redirect(['msg' => 'deleted']);
+        }
+    }
+
+    private static function redirect(array $args): void
+    {
+        $args = array_merge(['page' => self::MENU_SLUG], $args);
+        wp_safe_redirect(admin_url('admin.php?' . http_build_query($args)));
+        exit;
     }
 
     /* ===== באנר במסך ההזמנות ===== */
@@ -88,7 +139,7 @@ class CO2B_Wholesale_Admin
         }
 
         $latest = wc_get_orders([
-            'status'     => CO2B_Wholesale::STATUS_FULL,
+            'status'     => CO2B_Wholesale::status_keys_prefixed(),
             'limit'      => 1,
             'orderby'    => 'date',
             'order'      => 'DESC',

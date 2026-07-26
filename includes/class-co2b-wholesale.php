@@ -27,12 +27,43 @@ class CO2B_Wholesale
 
     public static function init(): void
     {
-        /* הסטטוס נרשם תמיד — כדי שהזמנות קיימות יוצגו נכון גם אם המודול כובה */
+        /* הסטטוסים נרשמים תמיד — כדי שהזמנות קיימות יוצגו נכון גם אם המודול כובה */
         add_filter('woocommerce_register_shop_order_post_statuses', [__CLASS__, 'register_post_status']);
         add_filter('wc_order_statuses', [__CLASS__, 'add_order_status']);
 
         /* התראה על הזמנה סיטונאית חדשה (רץ גם בשליחה מהפרונט) */
         add_action('woocommerce_order_status_changed', [__CLASS__, 'on_status_changed'], 20, 4);
+
+        /* איפוס ספירת "לא נקרא" במחיקה/אשפה/שחזור (HPOS + legacy) */
+        foreach (['woocommerce_trash_order', 'woocommerce_delete_order', 'woocommerce_untrash_order',
+                  'trashed_post', 'untrashed_post', 'before_delete_post'] as $hook) {
+            add_action($hook, [__CLASS__, 'flush_unread']);
+        }
+    }
+
+    /* ===== סטטוסי הזרימה של הזמנה סיטונאית (בלי קידומת wc-) ===== */
+    public static function statuses(): array
+    {
+        return [
+            'co2b-whsale'    => 'סיטונאית: חדשה',
+            'co2b-handling'  => 'סיטונאית: בטיפול',
+            'co2b-warehouse' => 'סיטונאית: נשלח למחסן',
+            'co2b-shipping'  => 'סיטונאית: יצא להובלה',
+            'co2b-delivered' => 'סיטונאית: הגיע ללקוח',
+        ];
+    }
+
+    /* מפתחות הסטטוסים עם קידומת wc- (לשאילתות wc_get_orders) */
+    public static function status_keys_prefixed(): array
+    {
+        return array_map(function ($k) {
+            return 'wc-' . $k;
+        }, array_keys(self::statuses()));
+    }
+
+    public static function flush_unread($id = 0): void
+    {
+        delete_transient(self::TRANSIENT_UNREAD);
     }
 
     public static function enabled(): bool
@@ -78,31 +109,39 @@ class CO2B_Wholesale
 
     public static function register_post_status($statuses)
     {
-        $statuses[self::STATUS_FULL] = [
-            'label'                     => 'הזמנה סיטונאית',
-            'public'                    => false,
-            'exclude_from_search'       => false,
-            'show_in_admin_all_list'    => true,
-            'show_in_admin_status_list' => true,
-            'label_count'               => _n_noop(
-                'הזמנה סיטונאית <span class="count">(%s)</span>',
-                'הזמנות סיטונאיות <span class="count">(%s)</span>'
-            ),
-        ];
+        foreach (self::statuses() as $key => $label) {
+            $statuses['wc-' . $key] = [
+                'label'                     => $label,
+                'public'                    => false,
+                'exclude_from_search'       => false,
+                'show_in_admin_all_list'    => true,
+                'show_in_admin_status_list' => true,
+                'label_count'               => _n_noop(
+                    $label . ' <span class="count">(%s)</span>',
+                    $label . ' <span class="count">(%s)</span>'
+                ),
+            ];
+        }
         return $statuses;
     }
 
     public static function add_order_status($statuses)
     {
+        $ours = [];
+        foreach (self::statuses() as $key => $label) {
+            $ours['wc-' . $key] = $label;
+        }
         $out = [];
         foreach ($statuses as $key => $label) {
             $out[$key] = $label;
             if ($key === 'wc-processing') {
-                $out[self::STATUS_FULL] = 'הזמנה סיטונאית';
+                $out += $ours;
             }
         }
-        if (!isset($out[self::STATUS_FULL])) {
-            $out[self::STATUS_FULL] = 'הזמנה סיטונאית';
+        foreach ($ours as $key => $label) {
+            if (!isset($out[$key])) {
+                $out[$key] = $label;
+            }
         }
         return $out;
     }
@@ -409,9 +448,6 @@ class CO2B_Wholesale
 
     public static function on_status_changed($order_id, $old, $new, $order = null): void
     {
-        if ($new !== self::STATUS) {
-            return;
-        }
         if (!$order instanceof WC_Order) {
             $order = wc_get_order($order_id);
         }
@@ -420,13 +456,20 @@ class CO2B_Wholesale
         }
         delete_transient(self::TRANSIENT_UNREAD);
 
-        if ($order->get_meta(self::META_NOTIFIED) === 'yes') {
-            return;
+        if ($new === self::STATUS) {
+            /* סטטוס התחלתי (חדשה) — התראה חד-פעמית */
+            if ($order->get_meta(self::META_NOTIFIED) !== 'yes') {
+                $order->update_meta_data(self::META_NOTIFIED, 'yes');
+                $order->save_meta_data();
+                self::send_admin_email($order);
+            }
+        } elseif (array_key_exists($new, self::statuses())) {
+            /* התקדמה לשלב מאוחר יותר — כבר לא "חדשה/לא נקראה" */
+            if ($order->get_meta(self::META_UNREAD) === 'yes') {
+                $order->update_meta_data(self::META_UNREAD, 'no');
+                $order->save_meta_data();
+            }
         }
-        $order->update_meta_data(self::META_NOTIFIED, 'yes');
-        $order->save_meta_data();
-
-        self::send_admin_email($order);
     }
 
     private static function send_admin_email(WC_Order $order): void
@@ -461,7 +504,7 @@ class CO2B_Wholesale
             return (int) $cached;
         }
         $ids = wc_get_orders([
-            'status'     => self::STATUS_FULL,
+            'status'     => self::status_keys_prefixed(),
             'limit'      => -1,
             'return'     => 'ids',
             'meta_query' => [['key' => self::META_UNREAD, 'value' => 'yes']],
