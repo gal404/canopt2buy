@@ -15,6 +15,18 @@ $statuses  = CO2B_Wholesale::statuses();
 $cur       = $order->get_status();
 $order_id  = $order->get_id();
 
+/* פירוק נטו/מע"מ — משתמש בערכים שנשמרו; להזמנה שאומצה ידנית גוזר מהסה"כ */
+$w_net  = (float) $order->get_meta(CO2B_Wholesale::META_NET);
+$w_vat  = (float) $order->get_meta(CO2B_Wholesale::META_VAT);
+$w_ship = (float) $order->get_meta(CO2B_Wholesale::META_SHIP);
+$w_rate = $order->get_meta(CO2B_Wholesale::META_VAT_RATE);
+$w_rate = ($w_rate !== '' && $w_rate !== null) ? (float) $w_rate : (float) CO2B_Settings::get('wholesale_vat');
+$w_grand = (float) $order->get_total();
+if ($w_net <= 0 && $w_grand > 0) {
+    $w_net = round($w_grand / (1 + $w_rate / 100), 2);
+    $w_vat = round($w_grand - $w_net, 2);
+}
+
 $notices = [
     'status' => ['success', '✅ הסטטוס עודכן.'],
     'note'   => ['success', '✅ ההערה נוספה.'],
@@ -74,10 +86,10 @@ $notices = [
         <div class="co2b-wsa-card">
             <h2>💰 סיכום</h2>
             <table class="co2b-wsa-kv">
-                <tr><th>נטו</th><td><?php echo wp_kses_post(wc_price((float) $order->get_meta(CO2B_Wholesale::META_NET))); ?></td></tr>
-                <tr><th>מע"מ (<?php echo esc_html($order->get_meta(CO2B_Wholesale::META_VAT_RATE)); ?>%)</th><td><?php echo wp_kses_post(wc_price((float) $order->get_meta(CO2B_Wholesale::META_VAT))); ?></td></tr>
-                <tr><th>הובלה</th><td><?php echo wp_kses_post(wc_price((float) $order->get_meta(CO2B_Wholesale::META_SHIP))); ?></td></tr>
-                <tr class="co2b-wsa-kv-total"><th>סה"כ (כולל מע"מ)</th><td><?php echo wp_kses_post(wc_price($order->get_total())); ?></td></tr>
+                <tr><th>נטו</th><td><?php echo wp_kses_post(wc_price($w_net)); ?></td></tr>
+                <tr><th>מע"מ (<?php echo esc_html(rtrim(rtrim(number_format($w_rate, 2), '0'), '.')); ?>%)</th><td><?php echo wp_kses_post(wc_price($w_vat)); ?></td></tr>
+                <tr><th>הובלה</th><td><?php echo wp_kses_post(wc_price($w_ship)); ?></td></tr>
+                <tr class="co2b-wsa-kv-total"><th>סה"כ (כולל מע"מ)</th><td><?php echo wp_kses_post(wc_price($w_grand)); ?></td></tr>
             </table>
         </div>
     </div>

@@ -55,7 +55,8 @@ class CO2B_Wholesale_Admin
 
         if ($action === 'view' && $id) {
             $order = wc_get_order($id);
-            if ($order && $order->get_meta(CO2B_Wholesale::META_FLAG) === 'yes') {
+            if ($order && CO2B_Wholesale::is_managed($order)) {
+                CO2B_Wholesale::adopt($order); // אימוץ הזמנה שהומרה ידנית לסטטוס סיטונאי
                 CO2B_Wholesale::mark_read($order);
                 $notes = wc_get_order_notes(['order_id' => $id]);
                 require CO2B_PLUGIN_DIR . 'includes/admin/views/wholesale-detail.php';
@@ -68,13 +69,12 @@ class CO2B_Wholesale_Admin
         $paged = max(1, isset($_GET['paged']) ? (int) $_GET['paged'] : 1);
         $per   = 20;
         $query = wc_get_orders([
-            'status'     => CO2B_Wholesale::status_keys_prefixed(),
-            'limit'      => $per,
-            'page'       => $paged,
-            'paginate'   => true,
-            'orderby'    => 'date',
-            'order'      => 'DESC',
-            'meta_query' => [['key' => CO2B_Wholesale::META_FLAG, 'value' => 'yes']],
+            'status'   => CO2B_Wholesale::status_keys_prefixed(),
+            'limit'    => $per,
+            'page'     => $paged,
+            'paginate' => true,
+            'orderby'  => 'date',
+            'order'    => 'DESC',
         ]);
 
         require CO2B_PLUGIN_DIR . 'includes/admin/views/wholesale-list.php';
@@ -96,9 +96,10 @@ class CO2B_Wholesale_Admin
         }
 
         $order = $id ? wc_get_order($id) : null;
-        if (!$order || $order->get_meta(CO2B_Wholesale::META_FLAG) !== 'yes') {
+        if (!$order || !CO2B_Wholesale::is_managed($order)) {
             self::redirect(['msg' => 'notfound']);
         }
+        CO2B_Wholesale::adopt($order);
 
         if ($act === 'status') {
             $new = preg_replace('/^wc-/', '', sanitize_key(wp_unslash($_POST['new_status'] ?? '')));
@@ -187,7 +188,7 @@ class CO2B_Wholesale_Admin
     public static function render_metabox($post_or_order): void
     {
         $order = ($post_or_order instanceof WC_Order) ? $post_or_order : wc_get_order($post_or_order->ID ?? 0);
-        if (!$order || $order->get_meta(CO2B_Wholesale::META_FLAG) !== 'yes') {
+        if (!$order || !CO2B_Wholesale::is_managed($order)) {
             echo '<p style="color:#64748b">הזמנה זו אינה סיטונאית.</p>';
             return;
         }

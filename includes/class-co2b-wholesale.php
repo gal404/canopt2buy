@@ -451,8 +451,25 @@ class CO2B_Wholesale
         if (!$order instanceof WC_Order) {
             $order = wc_get_order($order_id);
         }
-        if (!$order || $order->get_meta(self::META_FLAG) !== 'yes') {
+        if (!$order) {
             return;
+        }
+
+        $is_ws   = array_key_exists($new, self::statuses());
+        $flagged = $order->get_meta(self::META_FLAG) === 'yes';
+
+        /* אימוץ: הזמנה רגילה שהועברה ידנית לסטטוס סיטונאי (דרך עורך WooCommerce)
+           הופכת להזמנה סיטונאית מנוהלת — בלי מייל (המנהל יזם את השינוי). */
+        if ($is_ws && !$flagged) {
+            $order->update_meta_data(self::META_FLAG, 'yes');
+            $order->update_meta_data(self::META_NOTIFIED, 'yes');
+            $order->save_meta_data();
+            delete_transient(self::TRANSIENT_UNREAD);
+            return;
+        }
+
+        if (!$flagged) {
+            return; // לא הזמנה סיטונאית
         }
         delete_transient(self::TRANSIENT_UNREAD);
 
@@ -463,7 +480,7 @@ class CO2B_Wholesale
                 $order->save_meta_data();
                 self::send_admin_email($order);
             }
-        } elseif (array_key_exists($new, self::statuses())) {
+        } elseif ($is_ws) {
             /* התקדמה לשלב מאוחר יותר — כבר לא "חדשה/לא נקראה" */
             if ($order->get_meta(self::META_UNREAD) === 'yes') {
                 $order->update_meta_data(self::META_UNREAD, 'no');
@@ -520,6 +537,28 @@ class CO2B_Wholesale
             $order->update_meta_data(self::META_UNREAD, 'no');
             $order->save_meta_data();
             delete_transient(self::TRANSIENT_UNREAD);
+        }
+    }
+
+    /* הזמנה מנוהלת ע"י התוסף — סומנה כסיטונאית או נמצאת באחד מסטטוסי הסיטונאות */
+    public static function is_managed($order): bool
+    {
+        if (!$order instanceof WC_Order) {
+            return false;
+        }
+        return $order->get_meta(self::META_FLAG) === 'yes'
+            || array_key_exists($order->get_status(), self::statuses());
+    }
+
+    /* אימוץ הזמנה שהומרה ידנית לסטטוס סיטונאי — מסמן אותה כסיטונאית (בלי מייל) */
+    public static function adopt(WC_Order $order): void
+    {
+        if ($order->get_meta(self::META_FLAG) !== 'yes') {
+            $order->update_meta_data(self::META_FLAG, 'yes');
+            if ($order->get_meta(self::META_NOTIFIED) !== 'yes') {
+                $order->update_meta_data(self::META_NOTIFIED, 'yes');
+            }
+            $order->save_meta_data();
         }
     }
 
