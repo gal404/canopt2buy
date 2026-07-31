@@ -86,8 +86,12 @@
     color: #fff;
     box-shadow: 0 4px 14px rgba(15, 23, 42, .22);
 }
-.co2b-panel { display: none; }
-.co2b-panel.is-active { display: block; animation: co2b-panel-in .25s ease; }
+/* ללא JS — כל הפאנלים מוצגים (מונע מסך ריק אם הסקריפט לא נטען).
+   רק אחרי אתחול ה-JS עוברים לתצוגת טאבים. */
+.co2b-tabs { display: none; }
+.co2b-tabs-ready .co2b-tabs { display: flex; }
+.co2b-tabs-ready .co2b-panel { display: none; }
+.co2b-tabs-ready .co2b-panel.is-active { display: block; animation: co2b-panel-in .25s ease; }
 @keyframes co2b-panel-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 
 /* ----- Switch ----- */

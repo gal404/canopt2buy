@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Cancel Option 2 Buy
  * Description: חסימת רכישה אונליין למוצרים/קטגוריות נבחרים + מסלול הזמנה סיטונאית שאינו מחייב. המוצר מוצג רגיל אך לא ניתן להוספה לעגלה, למעט מנהלי חנות.
- * Version: 1.2.2
+ * Version: 1.2.3
  * Author: Gal Ben Baruch
  * Requires Plugins: woocommerce
  * Requires PHP: 7.4
@@ -12,7 +12,7 @@
 if (!defined('ABSPATH')) exit;
 
 /* ===== קבועים ===== */
-define('CO2B_VERSION', '1.2.2');
+define('CO2B_VERSION', '1.2.3');
 define('CO2B_PLUGIN_FILE', __FILE__);
 define('CO2B_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('CO2B_PLUGIN_URL', plugin_dir_url(__FILE__));

@@ -11,7 +11,9 @@ jQuery(function ($) {
         $preview.text(text !== '' ? text : defaultText);
     });
 
-    /* טאבים */
+    /* טאבים — מופעלים רק אחרי שה-JS נטען (אחרת כל הפאנלים מוצגים) */
+    $('.co2b-wrap').addClass('co2b-tabs-ready');
+
     $('.co2b-tab').on('click', function () {
         var tab = $(this).data('tab');
         $('.co2b-tab').removeClass('is-active');
