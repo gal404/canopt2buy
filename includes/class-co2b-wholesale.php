@@ -520,13 +520,13 @@ class CO2B_Wholesale
         if ($cached !== false) {
             return (int) $cached;
         }
-        $ids = wc_get_orders([
-            'status'     => self::status_keys_prefixed(),
-            'limit'      => -1,
-            'return'     => 'ids',
-            'meta_query' => [['key' => self::META_UNREAD, 'value' => 'yes']],
-        ]);
-        $count = is_array($ids) ? count($ids) : 0;
+        /* סינון ה"לא נקרא" ב-PHP — meta_query ב-wc_get_orders אינו אמין ב-HPOS */
+        $count = 0;
+        foreach (self::get_orders() as $o) {
+            if ($o->get_meta(self::META_UNREAD) === 'yes') {
+                $count++;
+            }
+        }
         set_transient(self::TRANSIENT_UNREAD, $count, 300);
         return $count;
     }
@@ -540,28 +540,33 @@ class CO2B_Wholesale
         }
     }
 
-    /* כל מזהי ההזמנות הסיטונאיות — איחוד של "מסומנות כסיטונאיות" (בכל סטטוס)
-       ושל "נמצאות בסטטוס סיטונאי". כך הזמנה לא נעלמת מהרשימה גם אם הועברה
-       בעורך WooCommerce לסטטוס אחר (הושלמה/בוטלה) או שטרם אומצה. */
+    /* מזהי ההזמנות הסיטונאיות — סינון לפי סטטוס בלבד.
+       חשוב: אין להסתמך על meta_query ב-wc_get_orders — ב-HPOS הוא מתעלם
+       ומחזיר את כל ההזמנות. סינון לפי מטא נעשה תמיד ב-PHP. */
     public static function get_order_ids(): array
     {
-        $all_statuses = array_keys(wc_get_order_statuses()); // ללא אשפה
-
-        $by_status = wc_get_orders([
+        $ids = wc_get_orders([
             'status' => self::status_keys_prefixed(),
             'limit'  => -1,
             'return' => 'ids',
         ]);
-        $by_flag = wc_get_orders([
-            'status'     => $all_statuses,
-            'limit'      => -1,
-            'return'     => 'ids',
-            'meta_query' => [['key' => self::META_FLAG, 'value' => 'yes']],
-        ]);
-
-        $ids = array_map('intval', array_unique(array_merge((array) $by_status, (array) $by_flag)));
+        $ids = array_map('intval', (array) $ids);
         rsort($ids, SORT_NUMERIC); // החדשות ראשונות
         return $ids;
+    }
+
+    /* הזמנות סיטונאיות מאומתות (WC_Order[]) — עם אימות ב-PHP */
+    public static function get_orders(array $ids = null): array
+    {
+        $ids = $ids ?? self::get_order_ids();
+        $out = [];
+        foreach ($ids as $id) {
+            $o = wc_get_order($id);
+            if ($o && self::is_managed($o)) {
+                $out[] = $o;
+            }
+        }
+        return $out;
     }
 
     /* הזמנה מנוהלת ע"י התוסף — סומנה כסיטונאית או נמצאת באחד מסטטוסי הסיטונאות */

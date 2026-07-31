@@ -73,10 +73,8 @@ class CO2B_Wholesale_Admin
         $total = count($ids);
         $pages = max(1, (int) ceil($total / $per));
         $paged = min($paged, $pages); // מונע עמוד ריק מקישור ישן
-        $orders = array_values(array_filter(array_map(
-            'wc_get_order',
-            array_slice($ids, ($paged - 1) * $per, $per)
-        )));
+        /* get_orders מאמת שכל הזמנה אכן סיטונאית (לא מסתמכים על השאילתה בלבד) */
+        $orders = CO2B_Wholesale::get_orders(array_slice($ids, ($paged - 1) * $per, $per));
 
         require CO2B_PLUGIN_DIR . 'includes/admin/views/wholesale-list.php';
     }
@@ -146,21 +144,17 @@ class CO2B_Wholesale_Admin
             return;
         }
 
-        $latest = wc_get_orders([
-            'status'     => CO2B_Wholesale::status_keys_prefixed(),
-            'limit'      => 1,
-            'orderby'    => 'date',
-            'order'      => 'DESC',
-            'meta_query' => [['key' => CO2B_Wholesale::META_UNREAD, 'value' => 'yes']],
-        ]);
+        /* ההזמנה הלא-נקראה האחרונה — סינון ב-PHP (meta_query אינו אמין ב-HPOS) */
         $detail = '';
-        if (!empty($latest)) {
-            $o = $latest[0];
-            $detail = sprintf(
-                ' האחרונה: %s, %s.',
-                esc_html($o->get_formatted_billing_full_name()),
-                esc_html($o->get_billing_phone())
-            );
+        foreach (CO2B_Wholesale::get_orders() as $o) {
+            if ($o->get_meta(CO2B_Wholesale::META_UNREAD) === 'yes') {
+                $detail = sprintf(
+                    ' האחרונה: %s, %s.',
+                    esc_html($o->get_formatted_billing_full_name()),
+                    esc_html($o->get_billing_phone())
+                );
+                break;
+            }
         }
 
         printf(
