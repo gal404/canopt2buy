@@ -4,13 +4,13 @@ defined('ABSPATH') || exit;
 /**
  * רשימת הזמנות סיטונאיות — נטען מ-CO2B_Wholesale_Admin::render_page()
  *
- * @var stdClass $query תוצאת wc_get_orders(paginate=true): ->orders, ->total, ->max_num_pages
- * @var int      $paged
- * @var string   $msg
+ * @var WC_Order[] $orders הזמנות העמוד הנוכחי
+ * @var int        $total  סה"כ הזמנות
+ * @var int        $pages  מספר עמודים
+ * @var int        $paged
+ * @var string     $msg
  */
 
-$orders   = $query->orders;
-$pages    = (int) $query->max_num_pages;
 $statuses = CO2B_Wholesale::statuses();
 
 $notices = [
@@ -31,7 +31,7 @@ $notices = [
             <h1>הזמנות סיטונאיות</h1>
             <p>בקשות הזמנה שהתקבלו מהחנות — ללא חיוב, לטיפול ידני.</p>
         </div>
-        <span class="co2b-wsa-total"><?php echo (int) $query->total; ?> הזמנות</span>
+        <span class="co2b-wsa-total"><?php echo (int) $total; ?> הזמנות</span>
     </div>
 
     <?php if (empty($orders)) : ?>

@@ -540,6 +540,30 @@ class CO2B_Wholesale
         }
     }
 
+    /* כל מזהי ההזמנות הסיטונאיות — איחוד של "מסומנות כסיטונאיות" (בכל סטטוס)
+       ושל "נמצאות בסטטוס סיטונאי". כך הזמנה לא נעלמת מהרשימה גם אם הועברה
+       בעורך WooCommerce לסטטוס אחר (הושלמה/בוטלה) או שטרם אומצה. */
+    public static function get_order_ids(): array
+    {
+        $all_statuses = array_keys(wc_get_order_statuses()); // ללא אשפה
+
+        $by_status = wc_get_orders([
+            'status' => self::status_keys_prefixed(),
+            'limit'  => -1,
+            'return' => 'ids',
+        ]);
+        $by_flag = wc_get_orders([
+            'status'     => $all_statuses,
+            'limit'      => -1,
+            'return'     => 'ids',
+            'meta_query' => [['key' => self::META_FLAG, 'value' => 'yes']],
+        ]);
+
+        $ids = array_map('intval', array_unique(array_merge((array) $by_status, (array) $by_flag)));
+        rsort($ids, SORT_NUMERIC); // החדשות ראשונות
+        return $ids;
+    }
+
     /* הזמנה מנוהלת ע"י התוסף — סומנה כסיטונאית או נמצאת באחד מסטטוסי הסיטונאות */
     public static function is_managed($order): bool
     {

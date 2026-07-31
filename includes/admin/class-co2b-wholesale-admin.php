@@ -68,14 +68,15 @@ class CO2B_Wholesale_Admin
 
         $paged = max(1, isset($_GET['paged']) ? (int) $_GET['paged'] : 1);
         $per   = 20;
-        $query = wc_get_orders([
-            'status'   => CO2B_Wholesale::status_keys_prefixed(),
-            'limit'    => $per,
-            'page'     => $paged,
-            'paginate' => true,
-            'orderby'  => 'date',
-            'order'    => 'DESC',
-        ]);
+
+        $ids   = CO2B_Wholesale::get_order_ids();
+        $total = count($ids);
+        $pages = max(1, (int) ceil($total / $per));
+        $paged = min($paged, $pages); // מונע עמוד ריק מקישור ישן
+        $orders = array_values(array_filter(array_map(
+            'wc_get_order',
+            array_slice($ids, ($paged - 1) * $per, $per)
+        )));
 
         require CO2B_PLUGIN_DIR . 'includes/admin/views/wholesale-list.php';
     }
